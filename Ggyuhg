@@ -540,7 +540,7 @@ local Guess=button(GamePage,"Adivinar Slapper",169,34)
 local GuessAttempt=button(GamePage,"Adivinar quien intento pegarte",207,34)
 
 --------------------------------------------------
--- AUTO UNIRSE CON CLON FALSO
+-- AUTO UNIRSE CON CLON FALSO (VISIBLE Y SINCRONIZADO)
 --------------------------------------------------
 
 local AutoJoinBtn=button(GamePage,"auto unirse",245,34)
@@ -558,6 +558,8 @@ local JoinCoordinates = {
 
 local FakeCharacter = nil
 local FakeHumanoidRootPart = nil
+local connectionCloneDamage = nil
+local connectionRealDamage = nil
 
 local function createFakeCharacter()
 	local char = Player.Character
@@ -572,21 +574,45 @@ local function createFakeCharacter()
 			hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 		end
 		
+		-- Hacemos que el clon sea totalmente visible (transparencia 0) para ti (local)
 		for _, part in ipairs(clone:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.Anchored = true
 				part.CanCollide = false
-				part.Transparency = 0.3
+				part.Transparency = 0 -- 100% visible
 			end
 		end
 		
 		clone.Parent = workspace
 		FakeCharacter = clone
 		FakeHumanoidRootPart = clone:FindFirstChild("HumanoidRootPart")
+
+		-- Sincronización de Daño Bidireccional
+		local realHum = char:FindFirstChildOfClass("Humanoid")
+		local fakeHum = clone:FindFirstChildOfClass("Humanoid")
+
+		if realHum and fakeHum then
+			connectionCloneDamage = fakeHum.HealthChanged:Connect(function(newHealth)
+				if realHum and realHum.Health > newHealth then
+					local diff = realHum.Health - newHealth
+					realHum.Health = math.max(0, realHum.Health - diff)
+				end
+			end)
+
+			connectionRealDamage = realHum.HealthChanged:Connect(function(newHealth)
+				if fakeHum and fakeHum.Health > newHealth then
+					local diff = fakeHum.Health - newHealth
+					fakeHum.Health = math.max(0, fakeHum.Health - diff)
+				end
+			end)
+		end
 	end)
 end
 
 local function removeFakeCharacter()
+	if connectionCloneDamage then connectionCloneDamage:Disconnect() end
+	if connectionRealDamage then connectionRealDamage:Disconnect() end
+	
 	if FakeCharacter then
 		pcall(function()
 			FakeCharacter:Destroy()
@@ -1473,7 +1499,7 @@ local startPos
 
 Top.InputBegan:Connect(function(input)
 	if input.UserInputType==Enum.UserInputType.Touch
-	or input.UserInputType==Enum.UserInputType.MouseButton1 then
+	or input.UserInputType==Enum.MouseButton1 then
 
 		dragging=true
 		dragStart=input.Position
