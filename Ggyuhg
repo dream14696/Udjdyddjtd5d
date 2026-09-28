@@ -1,0 +1,1810 @@
+local Players=game:GetService("Players")
+local ReplicatedStorage=game:GetService("ReplicatedStorage")
+local TweenService=game:GetService("TweenService")
+local UserInputService=game:GetService("UserInputService")
+local StatsService=game:GetService("Stats")
+local RunService=game:GetService("RunService")
+local SoundService=game:GetService("SoundService")
+local HapticService=game:GetService("HapticService")
+
+local Player=Players.LocalPlayer
+local PG=Player:WaitForChild("PlayerGui")
+local PROFILE_URL="https://www.roblox.com/es/users/9059869146/profile"
+
+local AutoSlap=false
+local AutoDodge=false
+local AutoExecute=true
+local Animations=true
+local Theme="Dark"
+
+local function tw(o,t,p)
+	return TweenService:Create(o,TweenInfo.new(t,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),p)
+end
+
+local function cr(o,r)
+	local c=Instance.new("UICorner")
+	c.CornerRadius=UDim.new(0,r)
+	c.Parent=o
+end
+
+local function st(o,c,w)
+	local s=Instance.new("UIStroke")
+	s.Color=c
+	s.Thickness=w
+	s.Parent=o
+	return s
+end
+
+local ParentTarget=PG
+
+pcall(function()
+	if gethui then
+		ParentTarget=gethui()
+	elseif game:GetService("CoreGui") then
+		ParentTarget=game:GetService("CoreGui")
+	end
+end)
+
+local OldGUI=ParentTarget:FindFirstChild("OP_ADIVINE_HUB") or PG:FindFirstChild("OP_ADIVINE_HUB")
+
+if OldGUI then
+	OldGUI:Destroy()
+end
+
+local GUI=Instance.new("ScreenGui")
+GUI.Name="OP_ADIVINE_HUB"
+GUI.ResetOnSpawn=false
+GUI.IgnoreGuiInset=true
+GUI.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+GUI.DisplayOrder=2147483647
+
+pcall(function()
+	GUI.ScreenInsets=Enum.ScreenInsets.None
+end)
+
+pcall(function()
+	if syn and syn.protect_gui then
+		syn.protect_gui(GUI)
+	end
+end)
+
+GUI.Parent=ParentTarget
+
+--------------------------------------------------
+-- INTRO
+--------------------------------------------------
+
+local Intro=Instance.new("Frame")
+Intro.Size=UDim2.fromScale(1,1)
+Intro.BackgroundColor3=Color3.new(0,0,0)
+Intro.BorderSizePixel=0
+Intro.Parent=GUI
+
+for i=1,45 do
+	local p=Instance.new("Frame")
+	local s=math.random(2,4)
+
+	p.Size=UDim2.fromOffset(s,s)
+	p.Position=UDim2.new(math.random(),0,-.05,0)
+	p.BackgroundColor3=Color3.new(1,1,1)
+	p.BackgroundTransparency=.35+math.random()*.4
+	p.BorderSizePixel=0
+	p.Parent=Intro
+
+	cr(p,s)
+
+	task.spawn(function()
+		while p.Parent do
+			local x=math.random(1,99)/100
+			local d=math.random(35,65)/10
+
+			p.Position=UDim2.new(x,0,-.05,0)
+
+			tw(p,d,{
+				Position=UDim2.new(x,0,1.05,0)
+			}):Play()
+
+			task.wait(d)
+		end
+	end)
+end
+
+local IntroTitle=Instance.new("TextLabel")
+IntroTitle.Size=UDim2.new(1,0,0,55)
+IntroTitle.Position=UDim2.new(0,0,.43,0)
+IntroTitle.BackgroundTransparency=1
+IntroTitle.Text="OP ADIVINE HUB"
+IntroTitle.Font=Enum.Font.GothamBold
+IntroTitle.TextSize=34
+IntroTitle.TextColor3=Color3.new(1,1,1)
+IntroTitle.TextTransparency=1
+IntroTitle.Parent=Intro
+
+local IntroBy=Instance.new("TextLabel")
+IntroBy.Size=UDim2.new(1,0,0,25)
+IntroBy.Position=UDim2.new(0,0,.51,0)
+IntroBy.BackgroundTransparency=1
+IntroBy.Text="by dremmser"
+IntroBy.Font=Enum.Font.Garamond
+IntroBy.TextSize=17
+IntroBy.TextColor3=Color3.fromRGB(160,190,230)
+IntroBy.TextTransparency=1
+IntroBy.Parent=Intro
+
+tw(IntroTitle,1.5,{TextTransparency=0}):Play()
+tw(IntroBy,1.5,{TextTransparency=0}):Play()
+
+task.wait(4)
+
+tw(IntroTitle,1.5,{TextTransparency=1}):Play()
+tw(IntroBy,1.5,{TextTransparency=1}):Play()
+
+task.wait(1.5)
+
+Intro:Destroy()
+
+--------------------------------------------------
+-- MAIN
+--------------------------------------------------
+
+local Main=Instance.new("Frame")
+Main.Name="Main"
+Main.Size=UDim2.fromOffset(330,350)
+Main.Position=UDim2.new(.5,-165,.5,-175)
+Main.BackgroundColor3=Color3.fromRGB(4,6,10)
+Main.BackgroundTransparency=.12
+Main.BorderSizePixel=0
+Main.Active=true
+Main.Parent=GUI
+
+cr(Main,14)
+
+local MainStroke=st(Main,Color3.fromRGB(0,125,255),2)
+
+--------------------------------------------------
+-- PARTICLES
+--------------------------------------------------
+
+local Particles=Instance.new("Frame")
+Particles.Size=UDim2.fromScale(1,1)
+Particles.BackgroundTransparency=1
+Particles.ClipsDescendants=true
+Particles.ZIndex=1
+Particles.Parent=Main
+
+for i=1,25 do
+	local p=Instance.new("Frame")
+	local s=math.random(1,3)
+
+	p.Size=UDim2.fromOffset(s,s)
+	p.Position=UDim2.new(math.random(),0,-.05,0)
+	p.BackgroundColor3=Color3.new(1,1,1)
+	p.BackgroundTransparency=.55
+	p.BorderSizePixel=0
+	p.ZIndex=1
+	p.Parent=Particles
+
+	cr(p,s)
+
+	task.spawn(function()
+		while p.Parent do
+			local x=math.random(2,98)/100
+			local d=math.random(25,55)/10
+
+			p.Position=UDim2.new(x,0,-.05,0)
+
+			tw(p,d,{
+				Position=UDim2.new(x,0,1.05,0)
+			}):Play()
+
+			task.wait(d)
+		end
+	end)
+end
+
+--------------------------------------------------
+-- TOP
+--------------------------------------------------
+
+local Top=Instance.new("Frame")
+Top.Size=UDim2.new(1,0,0,48)
+Top.BackgroundTransparency=1
+Top.Active=true
+Top.ZIndex=10
+Top.Parent=Main
+
+local Title=Instance.new("TextLabel")
+Title.Size=UDim2.new(1,-65,0,26)
+Title.Position=UDim2.fromOffset(12,4)
+Title.BackgroundTransparency=1
+Title.Text="OP ADIVINE HUB"
+Title.Font=Enum.Font.GothamBold
+Title.TextSize=17
+Title.TextColor3=Color3.new(1,1,1)
+Title.TextXAlignment=Enum.TextXAlignment.Left
+Title.ZIndex=11
+Title.Parent=Top
+
+local By=Instance.new("TextLabel")
+By.Size=UDim2.new(1,-65,0,16)
+By.Position=UDim2.fromOffset(13,27)
+By.BackgroundTransparency=1
+By.Text="by dremmser"
+By.Font=Enum.Font.Garamond
+By.TextSize=12
+By.TextColor3=Color3.fromRGB(130,175,230)
+By.TextXAlignment=Enum.TextXAlignment.Left
+By.ZIndex=11
+By.Parent=Top
+
+local Min=Instance.new("TextButton")
+Min.Size=UDim2.fromOffset(32,28)
+Min.Position=UDim2.new(1,-40,0,8)
+Min.BackgroundColor3=Color3.fromRGB(10,16,27)
+Min.Text="-"
+Min.Font=Enum.Font.GothamBold
+Min.TextSize=19
+Min.TextColor3=Color3.new(1,1,1)
+Min.ZIndex=20
+Min.Parent=Top
+
+cr(Min,7)
+local MinStroke=st(Min,Color3.fromRGB(0,125,255),1)
+
+--------------------------------------------------
+-- VIBRACION
+--------------------------------------------------
+
+local function vibrate()
+	pcall(function()
+		if HapticService:IsVibrationSupported(Enum.UserInputType.Gamepad1) then
+			HapticService:SetMotor(
+				Enum.UserInputType.Gamepad1,
+				Enum.VibrationMotor.Small,
+				.18
+			)
+
+			task.delay(.045,function()
+				pcall(function()
+					HapticService:SetMotor(
+						Enum.UserInputType.Gamepad1,
+						Enum.VibrationMotor.Small,
+						0
+					)
+				end)
+			end)
+		end
+	end)
+
+	pcall(function()
+		if haptic then
+			haptic(.18,.045)
+		end
+	end)
+
+	pcall(function()
+		if vibrateDevice then
+			vibrateDevice(.045)
+		end
+	end)
+end
+
+--------------------------------------------------
+-- TABS
+--------------------------------------------------
+
+local GameTab=Instance.new("TextButton")
+GameTab.Size=UDim2.new(.5,-9,0,31)
+GameTab.Position=UDim2.fromOffset(9,52)
+GameTab.BackgroundColor3=Color3.fromRGB(0,85,170)
+GameTab.Text="GAME"
+GameTab.Font=Enum.Font.GothamBold
+GameTab.TextSize=11
+GameTab.TextColor3=Color3.new(1,1,1)
+GameTab.ZIndex=10
+GameTab.Parent=Main
+
+cr(GameTab,7)
+
+local ConfigTab=Instance.new("TextButton")
+ConfigTab.Size=UDim2.new(.5,-9,0,31)
+ConfigTab.Position=UDim2.new(.5,0,0,52)
+ConfigTab.BackgroundColor3=Color3.fromRGB(12,17,25)
+ConfigTab.Text="CONFIGURATION"
+ConfigTab.Font=Enum.Font.GothamBold
+ConfigTab.TextSize=10
+ConfigTab.TextColor3=Color3.fromRGB(145,155,170)
+ConfigTab.ZIndex=10
+ConfigTab.Parent=Main
+
+cr(ConfigTab,7)
+
+--------------------------------------------------
+-- SCROLL
+--------------------------------------------------
+
+local function newScroll()
+	local s=Instance.new("ScrollingFrame")
+
+	s.Size=UDim2.new(1,-18,1,-91)
+	s.Position=UDim2.fromOffset(9,91)
+	s.BackgroundTransparency=1
+	s.BorderSizePixel=0
+	s.ScrollBarThickness=3
+	s.ScrollBarImageColor3=Color3.fromRGB(0,125,255)
+	s.CanvasSize=UDim2.new(0,0,0,0)
+	s.AutomaticCanvasSize=Enum.AutomaticSize.Y
+	s.ScrollingDirection=Enum.ScrollingDirection.Y
+	s.ZIndex=4
+	s.Parent=Main
+
+	return s
+end
+
+local GameScroll=newScroll()
+local ConfigScroll=newScroll()
+
+ConfigScroll.Visible=false
+
+local GamePage=Instance.new("Frame")
+GamePage.Size=UDim2.new(1,-5,0,1)
+GamePage.BackgroundTransparency=1
+GamePage.AutomaticSize=Enum.AutomaticSize.Y
+GamePage.Parent=GameScroll
+
+local ConfigPage=Instance.new("Frame")
+ConfigPage.Size=UDim2.new(1,-5,0,1)
+ConfigPage.BackgroundTransparency=1
+ConfigPage.AutomaticSize=Enum.AutomaticSize.Y
+ConfigPage.Parent=ConfigScroll
+
+--------------------------------------------------
+-- HELPERS
+--------------------------------------------------
+
+local CreatedButtons={}
+
+local function button(parent,text,y,h)
+	local b=Instance.new("TextButton")
+
+	b.Size=UDim2.new(1,0,0,h)
+	b.Position=UDim2.fromOffset(0,y)
+	b.BackgroundColor3=Color3.fromRGB(8,25,45)
+	b.Text=text
+	b.Font=Enum.Font.GothamBold
+	b.TextSize=11
+	b.TextColor3=Color3.new(1,1,1)
+	b.ZIndex=5
+	b.Parent=parent
+
+	cr(b,8)
+	local stroke=st(b,Color3.fromRGB(0,130,255),1)
+
+	b.MouseButton1Click:Connect(vibrate)
+
+	table.insert(CreatedButtons,{Btn=b,Stroke=stroke})
+
+	return b
+end
+
+--------------------------------------------------
+-- ESTADO / HORA
+--------------------------------------------------
+
+local Status=Instance.new("Frame")
+Status.Size=UDim2.new(1,0,0,53)
+Status.Position=UDim2.fromOffset(0,55)
+Status.BackgroundColor3=Color3.fromRGB(8,14,23)
+Status.BackgroundTransparency=.08
+Status.ZIndex=5
+Status.Parent=GamePage
+
+cr(Status,9)
+local StatusStroke=st(Status,Color3.fromRGB(0,95,220),1)
+
+local Clock=Instance.new("TextLabel")
+Clock.Size=UDim2.new(1,-16,0,25)
+Clock.Position=UDim2.fromOffset(8,3)
+Clock.BackgroundTransparency=1
+Clock.Text="00:00:00"
+Clock.Font=Enum.Font.Code
+Clock.TextSize=16
+Clock.TextColor3=Color3.new(1,1,1)
+Clock.TextXAlignment=Enum.TextXAlignment.Left
+Clock.ZIndex=6
+Clock.Parent=Status
+
+local FullDate=Instance.new("TextLabel")
+FullDate.Size=UDim2.new(1,-16,0,20)
+FullDate.Position=UDim2.fromOffset(8,29)
+FullDate.BackgroundTransparency=1
+FullDate.Text="Cargando fecha..."
+FullDate.Font=Enum.Font.Gotham
+FullDate.TextSize=9
+FullDate.TextColor3=Color3.fromRGB(135,155,180)
+FullDate.TextXAlignment=Enum.TextXAlignment.Left
+FullDate.ZIndex=6
+FullDate.Parent=Status
+
+local Days={
+	"domingo",
+	"lunes",
+	"martes",
+	"miércoles",
+	"jueves",
+	"viernes",
+	"sábado"
+}
+
+local Months={
+	"enero",
+	"febrero",
+	"marzo",
+	"abril",
+	"mayo",
+	"junio",
+	"julio",
+	"agosto",
+	"septiembre",
+	"octubre",
+	"noviembre",
+	"diciembre"
+}
+
+local function getDateInfo()
+	local d=os.date("*t")
+
+	if not d then
+		return "--:--:--","Fecha no disponible"
+	end
+
+	local timeText=string.format(
+		"%02d:%02d:%02d",
+		d.hour,
+		d.min,
+		d.sec
+	)
+
+	local dateText=string.format(
+		"%s, %d de %s de %d",
+		Days[d.wday] or "",
+		d.day,
+		Months[d.month] or "",
+		d.year
+	)
+
+	return timeText,dateText
+end
+
+--------------------------------------------------
+-- ACTUALIZAR HORA
+--------------------------------------------------
+
+task.spawn(function()
+	while GUI.Parent do
+		local timeText,dateText=getDateInfo()
+
+		Clock.Text=timeText
+		FullDate.Text=dateText
+
+		task.wait(1)
+	end
+end)
+
+--------------------------------------------------
+-- GAME
+--------------------------------------------------
+
+local Welcome=Instance.new("Frame")
+Welcome.Size=UDim2.new(1,0,0,50)
+Welcome.Position=UDim2.fromOffset(0,114)
+Welcome.BackgroundColor3=Color3.fromRGB(10,17,28)
+Welcome.BackgroundTransparency=.2
+Welcome.ZIndex=5
+Welcome.Parent=GamePage
+
+cr(Welcome,9)
+local WelcomeStroke=st(Welcome,Color3.fromRGB(0,95,220),1)
+
+local Avatar=Instance.new("ImageLabel")
+Avatar.Size=UDim2.fromOffset(38,38)
+Avatar.Position=UDim2.fromOffset(6,6)
+Avatar.BackgroundColor3=Color3.fromRGB(15,20,30)
+Avatar.ZIndex=6
+Avatar.Parent=Welcome
+
+cr(Avatar,20)
+local AvatarStroke=st(Avatar,Color3.fromRGB(0,150,255),2)
+
+pcall(function()
+	Avatar.Image=Players:GetUserThumbnailAsync(
+		Player.UserId,
+		Enum.ThumbnailType.HeadShot,
+		Enum.ThumbnailSize.Size100x100
+	)
+end)
+
+local WelcomeText=Instance.new("TextLabel")
+WelcomeText.Size=UDim2.new(1,-55,1,-8)
+WelcomeText.Position=UDim2.fromOffset(52,4)
+WelcomeText.BackgroundTransparency=1
+WelcomeText.Text="Bienvenido, "..Player.DisplayName
+WelcomeText.Font=Enum.Font.GothamMedium
+WelcomeText.TextSize=13
+WelcomeText.TextColor3=Color3.new(1,1,1)
+WelcomeText.TextXAlignment=Enum.TextXAlignment.Left
+WelcomeText.ZIndex=6
+WelcomeText.Parent=Welcome
+
+local Guess=button(GamePage,"Adivinar Slapper",169,34)
+local GuessAttempt=button(GamePage,"Adivinar quien intento pegarte",207,34)
+
+--------------------------------------------------
+-- AUTO UNIRSE CON CLON FALSO
+--------------------------------------------------
+
+local AutoJoinBtn=button(GamePage,"auto unirse",245,34)
+local AutoJoinActive=false
+
+local JoinCoordinates = {
+	Vector3.new(18, 4, -35),
+	Vector3.new(18, 5, -6),
+	Vector3.new(18, 4, 34),
+	Vector3.new(-4, 4, 55),
+	Vector3.new(-25, 4, 38),
+	Vector3.new(-25, 4, 0),
+	Vector3.new(-25, 4, -33)
+}
+
+local FakeCharacter = nil
+local FakeHumanoidRootPart = nil
+
+local function createFakeCharacter()
+	local char = Player.Character
+	if not char then return end
+
+	pcall(function()
+		local clone = char:Clone()
+		clone.Name = "OP_Adivine_FakeChar"
+		
+		local hum = clone:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		end
+		
+		for _, part in ipairs(clone:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Anchored = true
+				part.CanCollide = false
+				part.Transparency = 0.3
+			end
+		end
+		
+		clone.Parent = workspace
+		FakeCharacter = clone
+		FakeHumanoidRootPart = clone:FindFirstChild("HumanoidRootPart")
+	end)
+end
+
+local function removeFakeCharacter()
+	if FakeCharacter then
+		pcall(function()
+			FakeCharacter:Destroy()
+		end)
+		FakeCharacter = nil
+		FakeHumanoidRootPart = nil
+	end
+end
+
+task.spawn(function()
+	while GUI.Parent do
+		if AutoJoinActive then
+			if not FakeCharacter then
+				createFakeCharacter()
+			end
+			
+			for _, coord in ipairs(JoinCoordinates) do
+				if not AutoJoinActive then break end
+				pcall(function()
+					if FakeHumanoidRootPart then
+						FakeHumanoidRootPart.CFrame = CFrame.new(coord)
+					end
+				end)
+				task.wait(0.5)
+			end
+		else
+			if FakeCharacter then
+				removeFakeCharacter()
+			end
+			task.wait(0.2)
+		end
+	end
+end)
+
+AutoJoinBtn.MouseButton1Click:Connect(function()
+	AutoJoinActive = not AutoJoinActive
+	if AutoJoinActive then
+		AutoJoinBtn.Text = "stop auto unirse"
+		AutoJoinBtn.BackgroundColor3 = Color3.fromRGB(45, 15, 15)
+		if AutoJoinBtn:FindFirstChildOfClass("UIStroke") then
+			AutoJoinBtn:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(220, 50, 50)
+		end
+	else
+		AutoJoinBtn.Text = "auto unirse"
+		AutoJoinBtn.BackgroundColor3 = Color3.fromRGB(8, 25, 45)
+		if AutoJoinBtn:FindFirstChildOfClass("UIStroke") then
+			AutoJoinBtn:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(0, 130, 255)
+		end
+		removeFakeCharacter()
+	end
+end)
+
+--------------------------------------------------
+
+local Auto=Instance.new("TextButton")
+Auto.Size=UDim2.new(1,0,0,34)
+Auto.Position=UDim2.fromOffset(0,283)
+Auto.BackgroundColor3=Color3.fromRGB(12,16,23)
+Auto.Text="Auto Slap     OFF"
+Auto.Font=Enum.Font.GothamBold
+Auto.TextSize=11
+Auto.TextColor3=Color3.fromRGB(225,230,240)
+Auto.ZIndex=5
+Auto.Parent=GamePage
+
+cr(Auto,8)
+
+local AutoStroke=st(
+	Auto,
+	Color3.fromRGB(65,75,95),
+	1
+)
+
+local AutoDodgeBtn=Instance.new("TextButton")
+AutoDodgeBtn.Size=UDim2.new(1,0,0,34)
+AutoDodgeBtn.Position=UDim2.fromOffset(0,321)
+AutoDodgeBtn.BackgroundColor3=Color3.fromRGB(12,16,23)
+AutoDodgeBtn.Text="Auto Dodge [OFF]"
+AutoDodgeBtn.Font=Enum.Font.GothamBold
+AutoDodgeBtn.TextSize=11
+AutoDodgeBtn.TextColor3=Color3.fromRGB(225,230,240)
+AutoDodgeBtn.ZIndex=5
+AutoDodgeBtn.Parent=GamePage
+
+cr(AutoDodgeBtn,8)
+
+local AutoDodgeStroke=st(
+	AutoDodgeBtn,
+	Color3.fromRGB(65,75,95),
+	1
+)
+
+local Info=Instance.new("TextLabel")
+Info.Size=UDim2.new(1,0,0,45)
+Info.Position=UDim2.fromOffset(0,360)
+Info.BackgroundTransparency=1
+Info.Text="FPS: -- | RAM: -- MB | Ping: -- ms\nX: --  Y: --  Z: --"
+Info.Font=Enum.Font.Code
+Info.TextSize=9
+Info.TextColor3=Color3.fromRGB(140,155,175)
+Info.TextXAlignment=Enum.TextXAlignment.Left
+Info.TextYAlignment=Enum.TextYAlignment.Top
+Info.ZIndex=5
+Info.Parent=GamePage
+
+--------------------------------------------------
+-- CONFIG
+--------------------------------------------------
+
+local Follow=Instance.new("TextLabel")
+Follow.Size=UDim2.new(1,0,0,22)
+Follow.BackgroundTransparency=1
+Follow.Text="Sígueme para más scripts"
+Follow.Font=Enum.Font.GothamBold
+Follow.TextSize=12
+Follow.TextColor3=Color3.new(1,1,1)
+Follow.ZIndex=5
+Follow.Parent=ConfigPage
+
+local Copy=button(ConfigPage,"COPY",26,32)
+
+local ThemeLabel=Instance.new("TextLabel")
+ThemeLabel.Size=UDim2.new(1,-100,0,28)
+ThemeLabel.Position=UDim2.fromOffset(0,66)
+ThemeLabel.BackgroundTransparency=1
+ThemeLabel.Text="Tema"
+ThemeLabel.Font=Enum.Font.GothamBold
+ThemeLabel.TextSize=12
+ThemeLabel.TextColor3=Color3.new(1,1,1)
+ThemeLabel.TextXAlignment=Enum.TextXAlignment.Left
+ThemeLabel.ZIndex=5
+ThemeLabel.Parent=ConfigPage
+
+local ThemeButton=Instance.new("TextButton")
+ThemeButton.Size=UDim2.fromOffset(90,28)
+ThemeButton.Position=UDim2.new(1,-90,0,66)
+ThemeButton.BackgroundColor3=Color3.fromRGB(15,22,32)
+ThemeButton.Text="Oscuro ▼"
+ThemeButton.Font=Enum.Font.Gotham
+ThemeButton.TextSize=10
+ThemeButton.TextColor3=Color3.new(1,1,1)
+ThemeButton.ZIndex=5
+ThemeButton.Parent=ConfigPage
+
+cr(ThemeButton,7)
+local ThemeButtonStroke=st(ThemeButton,Color3.fromRGB(0,125,255),1)
+
+local ThemeOptions=Instance.new("Frame")
+ThemeOptions.Size=UDim2.fromOffset(110,66)
+ThemeOptions.Position=UDim2.new(1,-110,0,95)
+ThemeOptions.BackgroundColor3=Color3.fromRGB(8,12,18)
+ThemeOptions.Visible=false
+ThemeOptions.ZIndex=30
+ThemeOptions.Parent=ConfigPage
+
+cr(ThemeOptions,8)
+local ThemeOptionsStroke=st(ThemeOptions,Color3.fromRGB(0,125,255),1)
+
+local Light=Instance.new("TextButton")
+Light.Size=UDim2.new(1,-8,0,25)
+Light.Position=UDim2.fromOffset(4,4)
+Light.BackgroundColor3=Color3.fromRGB(35,40,48)
+Light.Text="Claro"
+Light.Font=Enum.Font.Gotham
+Light.TextSize=10
+Light.TextColor3=Color3.fromRGB(190,195,205)
+Light.ZIndex=31
+Light.Parent=ThemeOptions
+
+cr(Light,6)
+
+local Dark=Light:Clone()
+Dark.Position=UDim2.fromOffset(4,37)
+Dark.Text="Oscuro"
+Dark.BackgroundColor3=Color3.fromRGB(75,80,90)
+Dark.Parent=ThemeOptions
+
+local CreatedToggles={}
+
+local function ApplyTheme()
+	if Theme=="Light" then
+		Main.BackgroundColor3=Color3.fromRGB(242,245,250)
+		MainStroke.Color=Color3.fromRGB(0,150,230)
+		ThemeButton.Text="Claro ▼"
+		ThemeButton.BackgroundColor3=Color3.fromRGB(220,225,235)
+		ThemeButton.TextColor3=Color3.fromRGB(20,25,35)
+		ThemeButtonStroke.Color=Color3.fromRGB(0,140,220)
+
+		ThemeOptions.BackgroundColor3=Color3.fromRGB(235,240,248)
+		ThemeOptionsStroke.Color=Color3.fromRGB(0,140,220)
+
+		Light.BackgroundColor3=Color3.fromRGB(0,130,220)
+		Light.TextColor3=Color3.new(1,1,1)
+
+		Dark.BackgroundColor3=Color3.fromRGB(205,212,225)
+		Dark.TextColor3=Color3.fromRGB(40,45,55)
+
+		Title.TextColor3=Color3.fromRGB(15,20,30)
+		By.TextColor3=Color3.fromRGB(30,100,180)
+		Min.BackgroundColor3=Color3.fromRGB(225,230,240)
+		Min.TextColor3=Color3.fromRGB(20,25,35)
+		MinStroke.Color=Color3.fromRGB(0,140,220)
+
+		Follow.TextColor3=Color3.fromRGB(15,20,30)
+		ThemeLabel.TextColor3=Color3.fromRGB(15,20,30)
+
+		Status.BackgroundColor3=Color3.fromRGB(228,234,245)
+		StatusStroke.Color=Color3.fromRGB(0,140,220)
+		Clock.TextColor3=Color3.fromRGB(15,20,30)
+		FullDate.TextColor3=Color3.fromRGB(70,90,120)
+
+		Welcome.BackgroundColor3=Color3.fromRGB(228,234,245)
+		WelcomeStroke.Color=Color3.fromRGB(0,140,220)
+		WelcomeText.TextColor3=Color3.fromRGB(15,20,30)
+		Avatar.BackgroundColor3=Color3.fromRGB(210,218,230)
+		AvatarStroke.Color=Color3.fromRGB(0,140,220)
+
+		Info.TextColor3=Color3.fromRGB(60,75,100)
+
+		for _, item in ipairs(CreatedButtons) do
+			item.Btn.BackgroundColor3=Color3.fromRGB(220,228,242)
+			item.Btn.TextColor3=Color3.fromRGB(15,25,45)
+			item.Stroke.Color=Color3.fromRGB(0,130,230)
+		end
+
+		for _, item in ipairs(CreatedToggles) do
+			item.Label.TextColor3=Color3.fromRGB(15,20,30)
+		end
+
+		if GameTab.BackgroundColor3 ~= Color3.fromRGB(0,85,170) then
+			GameTab.BackgroundColor3=Color3.fromRGB(220,225,235)
+			GameTab.TextColor3=Color3.fromRGB(60,70,85)
+		end
+
+		if ConfigTab.BackgroundColor3 ~= Color3.fromRGB(0,85,170) then
+			ConfigTab.BackgroundColor3=Color3.fromRGB(220,225,235)
+			ConfigTab.TextColor3=Color3.fromRGB(60,70,85)
+		end
+	else
+		Main.BackgroundColor3=Color3.fromRGB(4,6,10)
+		MainStroke.Color=Color3.fromRGB(0,125,255)
+		ThemeButton.Text="Oscuro ▼"
+		ThemeButton.BackgroundColor3=Color3.fromRGB(15,22,32)
+		ThemeButton.TextColor3=Color3.new(1,1,1)
+		ThemeButtonStroke.Color=Color3.fromRGB(0,125,255)
+
+		ThemeOptions.BackgroundColor3=Color3.fromRGB(8,12,18)
+		ThemeOptionsStroke.Color=Color3.fromRGB(0,125,255)
+
+		Light.BackgroundColor3=Color3.fromRGB(35,40,48)
+		Light.TextColor3=Color3.fromRGB(190,195,205)
+
+		Dark.BackgroundColor3=Color3.fromRGB(75,80,90)
+		Dark.TextColor3=Color3.new(1,1,1)
+
+		Title.TextColor3=Color3.new(1,1,1)
+		By.TextColor3=Color3.fromRGB(130,175,230)
+		Min.BackgroundColor3=Color3.fromRGB(10,16,27)
+		Min.TextColor3=Color3.new(1,1,1)
+		MinStroke.Color=Color3.fromRGB(0,125,255)
+
+		Follow.TextColor3=Color3.new(1,1,1)
+		ThemeLabel.TextColor3=Color3.new(1,1,1)
+
+		Status.BackgroundColor3=Color3.fromRGB(8,14,23)
+		StatusStroke.Color=Color3.fromRGB(0,95,220)
+		Clock.TextColor3=Color3.new(1,1,1)
+		FullDate.TextColor3=Color3.fromRGB(135,155,180)
+
+		Welcome.BackgroundColor3=Color3.fromRGB(10,17,28)
+		WelcomeStroke.Color=Color3.fromRGB(0,95,220)
+		WelcomeText.TextColor3=Color3.new(1,1,1)
+		Avatar.BackgroundColor3=Color3.fromRGB(15,20,30)
+		AvatarStroke.Color=Color3.fromRGB(0,150,255)
+
+		Info.TextColor3=Color3.fromRGB(140,155,175)
+
+		for _, item in ipairs(CreatedButtons) do
+			item.Btn.BackgroundColor3=Color3.fromRGB(8,25,45)
+			item.Btn.TextColor3=Color3.new(1,1,1)
+			item.Stroke.Color=Color3.fromRGB(0,130,255)
+		end
+
+		for _, item in ipairs(CreatedToggles) do
+			item.Label.TextColor3=Color3.new(1,1,1)
+		end
+
+		if GameTab.BackgroundColor3 ~= Color3.fromRGB(0,85,170) then
+			GameTab.BackgroundColor3=Color3.fromRGB(12,17,25)
+			GameTab.TextColor3=Color3.fromRGB(145,155,170)
+		end
+
+		if ConfigTab.BackgroundColor3 ~= Color3.fromRGB(0,85,170) then
+			ConfigTab.BackgroundColor3=Color3.fromRGB(12,17,25)
+			ConfigTab.TextColor3=Color3.fromRGB(145,155,170)
+		end
+	end
+end
+
+ThemeButton.MouseButton1Click:Connect(function()
+	vibrate()
+	ThemeOptions.Visible=not ThemeOptions.Visible
+end)
+
+Light.MouseButton1Click:Connect(function()
+	vibrate()
+	Theme="Light"
+	ApplyTheme()
+	ThemeOptions.Visible=false
+end)
+
+Dark.MouseButton1Click:Connect(function()
+	vibrate()
+	Theme="Dark"
+	ApplyTheme()
+	ThemeOptions.Visible=false
+end)
+
+local function toggle(parent,text,y,value,callback)
+	local label=Instance.new("TextLabel")
+	label.Size=UDim2.new(1,-80,0,28)
+	label.Position=UDim2.fromOffset(0,y)
+	label.BackgroundTransparency=1
+	label.Text=text
+	label.Font=Enum.Font.GothamBold
+	label.TextSize=12
+	label.TextColor3=Color3.new(1,1,1)
+	label.TextXAlignment=Enum.TextXAlignment.Left
+	label.ZIndex=5
+	label.Parent=parent
+
+	local b=Instance.new("TextButton")
+	b.Size=UDim2.fromOffset(58,27)
+	b.Position=UDim2.new(1,-58,0,y)
+	b.BackgroundColor3=value and Color3.fromRGB(0,110,210) or Color3.fromRGB(60,65,75)
+	b.Text=value and "ON" or "OFF"
+	b.Font=Enum.Font.GothamBold
+	b.TextSize=10
+	b.TextColor3=Color3.new(1,1,1)
+	b.ZIndex=5
+	b.Parent=parent
+
+	cr(b,13)
+
+	table.insert(CreatedToggles,{Label=label,Btn=b})
+
+	b.MouseButton1Click:Connect(function()
+		vibrate()
+
+		value=not value
+		b.Text=value and "ON" or "OFF"
+		b.BackgroundColor3=value
+			and Color3.fromRGB(0,110,210)
+			or Color3.fromRGB(60,65,75)
+
+		if callback then
+			callback(value)
+		end
+	end)
+
+	return b
+end
+
+local AnimToggle=toggle(
+	ConfigPage,
+	"Animaciones",
+	105,
+	Animations,
+	function(v)
+		Animations=v
+	end
+)
+
+--------------------------------------------------
+-- AUTOEJECUCIÓN AL TELETRANSPORTARSE
+--------------------------------------------------
+
+local function setupAutoExecute()
+	local scriptCode=[[
+		if not _G.OP_ADIVINE_HUB_LOADED then
+			_G.OP_ADIVINE_HUB_LOADED = true
+		end
+	]]
+
+	local queue=queue_on_teleport or (syn and syn.queue_on_teleport) or (fluxus and fluxus.queue_on_teleport)
+	if queue then
+		pcall(function()
+			queue(scriptCode)
+		end)
+	end
+end
+
+Player.OnTeleport:Connect(function(State)
+	if AutoExecute and State==Enum.TeleportState.Started then
+		setupAutoExecute()
+	end
+end)
+
+local ExecuteToggle=toggle(
+	ConfigPage,
+	"Autoejecutar",
+	140,
+	AutoExecute,
+	function(v)
+		AutoExecute=v
+	end
+)
+
+local Reset=Instance.new("TextButton")
+Reset.Size=UDim2.new(.48,0,0,33)
+Reset.Position=UDim2.fromOffset(0,176)
+Reset.BackgroundColor3=Color3.fromRGB(35,40,50)
+Reset.Text="Resetear Script"
+Reset.Font=Enum.Font.GothamBold
+Reset.TextSize=10
+Reset.TextColor3=Color3.new(1,1,1)
+Reset.ZIndex=5
+Reset.Parent=ConfigPage
+
+cr(Reset,8)
+
+local ResetInfo=Instance.new("TextLabel")
+ResetInfo.Size=UDim2.new(.48,0,0,33)
+ResetInfo.Position=UDim2.new(.52,0,0,176)
+ResetInfo.BackgroundTransparency=1
+ResetInfo.Text="Usar si se bugea"
+ResetInfo.Font=Enum.Font.Gotham
+ResetInfo.TextSize=9
+ResetInfo.TextColor3=Color3.fromRGB(130,140,155)
+ResetInfo.ZIndex=5
+ResetInfo.Parent=ConfigPage
+
+local Exit=Instance.new("TextButton")
+Exit.Size=UDim2.new(1,0,0,30)
+Exit.Position=UDim2.fromOffset(0,215)
+Exit.BackgroundColor3=Color3.fromRGB(75,25,30)
+Exit.Text="EXIT"
+Exit.Font=Enum.Font.GothamBold
+Exit.TextSize=10
+Exit.TextColor3=Color3.new(1,1,1)
+Exit.ZIndex=5
+Exit.Parent=ConfigPage
+
+cr(Exit,8)
+
+--------------------------------------------------
+-- EXIT CONFIRM
+--------------------------------------------------
+
+local Confirm=Instance.new("Frame")
+Confirm.Size=UDim2.fromOffset(250,135)
+Confirm.Position=UDim2.new(.5,-125,.5,-67)
+Confirm.BackgroundColor3=Color3.fromRGB(5,8,14)
+Confirm.Visible=false
+Confirm.ZIndex=100
+Confirm.Parent=GUI
+
+cr(Confirm,13)
+st(Confirm,Color3.fromRGB(0,125,255),2)
+
+local ConfirmText=Instance.new("TextLabel")
+ConfirmText.Size=UDim2.new(1,-20,0,50)
+ConfirmText.Position=UDim2.fromOffset(10,10)
+ConfirmText.BackgroundTransparency=1
+ConfirmText.Text="¿Quieres salir del menú?"
+ConfirmText.Font=Enum.Font.GothamBold
+ConfirmText.TextSize=14
+ConfirmText.TextColor3=Color3.new(1,1,1)
+ConfirmText.ZIndex=101
+ConfirmText.Parent=Confirm
+
+local Yes=Instance.new("TextButton")
+Yes.Size=UDim2.fromOffset(95,33)
+Yes.Position=UDim2.fromOffset(18,87)
+Yes.BackgroundColor3=Color3.fromRGB(125,35,40)
+Yes.Text="SALIR"
+Yes.Font=Enum.Font.GothamBold
+Yes.TextSize=10
+Yes.TextColor3=Color3.new(1,1,1)
+Yes.ZIndex=101
+Yes.Parent=Confirm
+
+cr(Yes,8)
+
+local No=Yes:Clone()
+No.Position=UDim2.fromOffset(137,87)
+No.BackgroundColor3=Color3.fromRGB(30,40,55)
+No.Text="CANCELAR"
+No.Parent=Confirm
+
+Exit.MouseButton1Click:Connect(function()
+	vibrate()
+	Confirm.Visible=true
+end)
+
+No.MouseButton1Click:Connect(function()
+	vibrate()
+	Confirm.Visible=false
+end)
+
+--------------------------------------------------
+-- COPY
+--------------------------------------------------
+
+Copy.MouseButton1Click:Connect(function()
+	vibrate()
+
+	local ok=pcall(function()
+		if setclipboard then
+			setclipboard(PROFILE_URL)
+		else
+			error()
+		end
+	end)
+
+	Copy.Text=ok and "COPIED" or "COPY NOT AVAILABLE"
+
+	task.delay(2,function()
+		if Copy.Parent then
+			Copy.Text="COPY"
+		end
+	end)
+end)
+
+--------------------------------------------------
+-- TABS
+--------------------------------------------------
+
+GameTab.MouseButton1Click:Connect(function()
+	vibrate()
+
+	GameScroll.Visible=true
+	ConfigScroll.Visible=false
+
+	GameTab.BackgroundColor3=Color3.fromRGB(0,85,170)
+	GameTab.TextColor3=Color3.new(1,1,1)
+
+	if Theme=="Light" then
+		ConfigTab.BackgroundColor3=Color3.fromRGB(220,225,235)
+		ConfigTab.TextColor3=Color3.fromRGB(60,70,85)
+	else
+		ConfigTab.BackgroundColor3=Color3.fromRGB(12,17,25)
+		ConfigTab.TextColor3=Color3.fromRGB(145,155,170)
+	end
+end)
+
+ConfigTab.MouseButton1Click:Connect(function()
+	vibrate()
+
+	GameScroll.Visible=false
+	ConfigScroll.Visible=true
+
+	ConfigTab.BackgroundColor3=Color3.fromRGB(0,85,170)
+	ConfigTab.TextColor3=Color3.new(1,1,1)
+
+	if Theme=="Light" then
+		GameTab.BackgroundColor3=Color3.fromRGB(220,225,235)
+		GameTab.TextColor3=Color3.fromRGB(60,70,85)
+	else
+		GameTab.BackgroundColor3=Color3.fromRGB(12,17,25)
+		GameTab.TextColor3=Color3.fromRGB(145,155,170)
+	end
+end)
+
+--------------------------------------------------
+-- SLAPPER
+--------------------------------------------------
+
+local LastAttacker=nil
+local LastHealth=nil
+
+local function findAttacker()
+	local char=Player.Character
+
+	if not char then
+		return
+	end
+
+	local root=char:FindFirstChild("HumanoidRootPart")
+
+	if not root then
+		return
+	end
+
+	local closest,dist=nil,18
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p~=Player and p.Character then
+			local r=p.Character:FindFirstChild("HumanoidRootPart")
+
+			if r then
+				local d=(r.Position-root.Position).Magnitude
+
+				if d<dist then
+					dist=d
+					closest=p
+				end
+			end
+		end
+	end
+
+	return closest
+end
+
+local function findClosestPlayer()
+	local char=Player.Character
+
+	if not char then
+		return
+	end
+
+	local root=char:FindFirstChild("HumanoidRootPart")
+
+	if not root then
+		return
+	end
+
+	local closest,dist=nil,math.huge
+
+	for _,p in ipairs(Players:GetPlayers()) do
+		if p~=Player and p.Character then
+			local r=p.Character:FindFirstChild("HumanoidRootPart")
+			local h=p.Character:FindFirstChild("Humanoid")
+
+			if r and h and h.Health>0 then
+				local d=(r.Position-root.Position).Magnitude
+
+				if d<dist then
+					dist=d
+					closest=p
+				end
+			end
+		end
+	end
+
+	return closest
+end
+
+local function connectCharacter(char)
+	local hum=char:WaitForChild("Humanoid")
+
+	LastHealth=hum.Health
+
+	hum.HealthChanged:Connect(function(h)
+		if h<LastHealth then
+			local attacker=findAttacker()
+
+			if attacker then
+				LastAttacker=attacker
+			end
+		end
+
+		LastHealth=h
+	end)
+end
+
+if Player.Character then
+	connectCharacter(Player.Character)
+end
+
+Player.CharacterAdded:Connect(function(char)
+	LastAttacker=nil
+	connectCharacter(char)
+end)
+
+--------------------------------------------------
+-- RESULT
+--------------------------------------------------
+
+local Result=Instance.new("Frame")
+Result.Size=UDim2.fromOffset(250,210)
+Result.Position=UDim2.new(.5,-125,.5,-105)
+Result.BackgroundColor3=Color3.fromRGB(4,7,13)
+Result.Visible=false
+Result.ZIndex=50
+Result.Parent=GUI
+
+cr(Result,14)
+st(Result,Color3.fromRGB(0,150,255),2)
+
+local ResultAvatar=Instance.new("ImageLabel")
+ResultAvatar.Size=UDim2.fromOffset(100,100)
+ResultAvatar.Position=UDim2.new(.5,-50,0,14)
+ResultAvatar.BackgroundColor3=Color3.fromRGB(10,20,35)
+ResultAvatar.ZIndex=51
+ResultAvatar.Parent=Result
+
+cr(ResultAvatar,50)
+st(ResultAvatar,Color3.fromRGB(0,160,255),3)
+
+local ResultName=Instance.new("TextLabel")
+ResultName.Size=UDim2.new(1,-20,0,42)
+ResultName.Position=UDim2.fromOffset(10,128)
+ResultName.BackgroundTransparency=1
+ResultName.Font=Enum.Font.GothamBold
+ResultName.TextSize=15
+ResultName.TextColor3=Color3.new(1,1,1)
+ResultName.TextScaled=true
+ResultName.ZIndex=51
+ResultName.Parent=Result
+
+local Close=Instance.new("TextButton")
+Close.Size=UDim2.fromOffset(32,32)
+Close.Position=UDim2.new(1,-38,0,5)
+Close.BackgroundTransparency=1
+Close.Text="×"
+Close.Font=Enum.Font.GothamBold
+Close.TextSize=23
+Close.TextColor3=Color3.new(1,1,1)
+Close.ZIndex=52
+Close.Parent=Result
+
+Close.MouseButton1Click:Connect(function()
+	vibrate()
+	Result.Visible=false
+end)
+
+local function showPlayer(p)
+	if not p then
+		return
+	end
+
+	pcall(function()
+		ResultAvatar.Image=Players:GetUserThumbnailAsync(
+			p.UserId,
+			Enum.ThumbnailType.HeadShot,
+			Enum.ThumbnailSize.Size420x420
+		)
+	end)
+
+	ResultName.Text=p.DisplayName.."  @"..p.Name
+	Result.Visible=true
+
+	task.delay(7,function()
+		if Result.Parent then
+			Result.Visible=false
+		end
+	end)
+end
+
+Guess.MouseButton1Click:Connect(function()
+	showPlayer(LastAttacker or findAttacker())
+end)
+
+GuessAttempt.MouseButton1Click:Connect(function()
+	showPlayer(findClosestPlayer())
+end)
+
+--------------------------------------------------
+-- EVENTS
+--------------------------------------------------
+
+local events=ReplicatedStorage:WaitForChild("events")
+local SlapQueue=events:WaitForChild("SlapQueue")
+local SendSlap=events:WaitForChild("SendSlap")
+local DodgeEvent=events:WaitForChild("Dodge")
+
+local SlapPower=.99927914142609
+local QueueWaiting=false
+local LastSlapTime=0
+local SlapCooldown=.20
+
+local function requestOneSlap()
+	if not AutoSlap or QueueWaiting then
+		return
+	end
+
+	QueueWaiting=true
+
+	pcall(function()
+		SlapQueue:FireServer()
+	end)
+end
+
+local function sendOneSlap()
+	if not AutoSlap or not QueueWaiting then
+		return
+	end
+
+	QueueWaiting=false
+
+	local now=os.clock()
+
+	if now-LastSlapTime<SlapCooldown then
+		return
+	end
+
+	LastSlapTime=now
+
+	pcall(function()
+		SendSlap:FireServer(SlapPower)
+	end)
+end
+
+SlapQueue.OnClientEvent:Connect(sendOneSlap)
+
+Auto.MouseButton1Click:Connect(function()
+	vibrate()
+
+	AutoSlap=not AutoSlap
+
+	if AutoSlap then
+		Auto.Text="Auto Slap     ON"
+		Auto.BackgroundColor3=Color3.fromRGB(5,45,25)
+		AutoStroke.Color=Color3.fromRGB(30,220,100)
+
+		requestOneSlap()
+	else
+		Auto.Text="Auto Slap     OFF"
+		Auto.BackgroundColor3=Color3.fromRGB(12,16,23)
+		AutoStroke.Color=Color3.fromRGB(65,75,95)
+
+		QueueWaiting=false
+	end
+end)
+
+--------------------------------------------------
+-- DODGE
+--------------------------------------------------
+
+local DodgeMode=0
+
+local function updateDodgeButtonVisual()
+	if DodgeMode==0 then
+		AutoDodgeBtn.Text="Auto Dodge [OFF]"
+		AutoDodgeBtn.BackgroundColor3=Color3.fromRGB(12,16,23)
+		AutoDodgeStroke.Color=Color3.fromRGB(65,75,95)
+
+	elseif DodgeMode==1 then
+		AutoDodgeBtn.Text="Auto Dodge [ON]"
+		AutoDodgeBtn.BackgroundColor3=Color3.fromRGB(45,35,5)
+		AutoDodgeStroke.Color=Color3.fromRGB(220,180,30)
+
+	else
+		AutoDodgeBtn.Text="Auto Dodge [SPAM]"
+		AutoDodgeBtn.BackgroundColor3=Color3.fromRGB(45,15,15)
+		AutoDodgeStroke.Color=Color3.fromRGB(220,50,50)
+	end
+end
+
+AutoDodgeBtn.MouseButton1Click:Connect(function()
+	vibrate()
+
+	DodgeMode=(DodgeMode+1)%3
+
+	updateDodgeButtonVisual()
+
+	if DodgeMode==0 then
+		pcall(function()
+			DodgeEvent:FireServer(false)
+		end)
+	end
+end)
+
+task.spawn(function()
+	while GUI.Parent do
+		if DodgeMode==1 then
+			pcall(function()
+				DodgeEvent:FireServer(true)
+			end)
+
+			task.wait(.10)
+
+		elseif DodgeMode==2 then
+			pcall(function()
+				DodgeEvent:FireServer(true)
+			end)
+
+			task.wait(.05)
+
+		else
+			task.wait(.2)
+		end
+	end
+end)
+
+--------------------------------------------------
+-- DRAG
+--------------------------------------------------
+
+local dragging=false
+local dragStart
+local startPos
+
+Top.InputBegan:Connect(function(input)
+	if input.UserInputType==Enum.UserInputType.Touch
+	or input.UserInputType==Enum.UserInputType.MouseButton1 then
+
+		dragging=true
+		dragStart=input.Position
+		startPos=Main.Position
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if not dragging then
+		return
+	end
+
+	if input.UserInputType==Enum.UserInputType.Touch
+	or input.UserInputType==Enum.MouseMovement then
+
+		local delta=input.Position-dragStart
+
+		Main.Position=UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset+delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset+delta.Y
+		)
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType==Enum.UserInputType.Touch
+	or input.UserInputType==Enum.MouseButton1 then
+
+		dragging=false
+	end
+end)
+
+--------------------------------------------------
+-- MINIMIZAR
+--------------------------------------------------
+
+local minimized=false
+local normalSize=UDim2.fromOffset(330,350)
+
+local function setBody(v)
+	GameTab.Visible=v
+	ConfigTab.Visible=v
+
+	if not v then
+		GameScroll.Visible=false
+		ConfigScroll.Visible=false
+	else
+		if ConfigScroll.Visible then
+			ConfigScroll.Visible=true
+		else
+			GameScroll.Visible=true
+		end
+	end
+end
+
+Min.MouseButton1Click:Connect(function()
+	vibrate()
+
+	minimized=not minimized
+
+	if minimized then
+		Min.Text="□"
+
+		setBody(false)
+
+		if Animations then
+			tw(Main,.25,{
+				Size=UDim2.fromOffset(260,48)
+			}):Play()
+		else
+			Main.Size=UDim2.fromOffset(260,48)
+		end
+	else
+		Min.Text="-"
+
+		if Animations then
+			tw(Main,.25,{
+				Size=normalSize
+			}):Play()
+		else
+			Main.Size=normalSize
+		end
+
+		setBody(true)
+	end
+end)
+
+--------------------------------------------------
+-- FPS / RAM / PING / COORDENADAS
+--------------------------------------------------
+
+local frames=0
+local fps=0
+local lastTime=os.clock()
+local statTimer=0
+
+RunService.RenderStepped:Connect(function(dt)
+	frames+=1
+
+	local now=os.clock()
+
+	if now-lastTime>=.5 then
+		fps=math.floor(
+			frames/(now-lastTime)
+		)
+
+		frames=0
+		lastTime=now
+	end
+
+	statTimer+=dt
+
+	if statTimer>=.15 then
+		statTimer=0
+
+		local ping=math.floor(
+			Player:GetNetworkPing()*1000+.5
+		)
+
+		local ram=math.floor(
+			StatsService:GetTotalMemoryUsageMb()
+		)
+
+		local char=Player.Character
+		local root=char and char:FindFirstChild("HumanoidRootPart")
+
+		if root then
+			local p=root.Position
+
+			Info.Text=string.format(
+				"FPS: %d | RAM: %d MB | Ping: %d ms\nX: %.1f  Y: %.1f  Z: %.1f",
+				fps,
+				ram,
+				ping,
+				p.X,
+				p.Y,
+				p.Z
+			)
+		else
+			Info.Text=string.format(
+				"FPS: %d | RAM: %d MB | Ping: %d ms\nX: --  Y: --  Z: --",
+				fps,
+				ram,
+				ping
+			)
+		end
+	end
+end)
+
+--------------------------------------------------
+-- NOTIFICACION GENERAL
+--------------------------------------------------
+
+local Notice=Instance.new("Frame")
+Notice.Size=UDim2.fromOffset(280,70)
+Notice.Position=UDim2.new(.5,-140,0,-90)
+Notice.BackgroundColor3=Color3.fromRGB(5,8,14)
+Notice.Visible=false
+Notice.ZIndex=200
+Notice.Parent=GUI
+
+cr(Notice,11)
+st(Notice,Color3.fromRGB(0,125,255),2)
+
+local NoticeText=Instance.new("TextLabel")
+NoticeText.Size=UDim2.new(1,-16,1,-8)
+NoticeText.Position=UDim2.fromOffset(8,4)
+NoticeText.BackgroundTransparency=1
+NoticeText.Text="te gusta nuestro menú,\n¡nos alegra cada momento que nos usas!"
+NoticeText.Font=Enum.Font.GothamBold
+NoticeText.TextSize=11
+NoticeText.TextWrapped=true
+NoticeText.TextColor3=Color3.new(1,1,1)
+NoticeText.ZIndex=201
+NoticeText.Parent=Notice
+
+local NoticeSound=Instance.new("Sound")
+NoticeSound.SoundId="rbxassetid://9118823101"
+NoticeSound.Volume=.35
+NoticeSound.Parent=SoundService
+
+local function showNotice()
+	if not GUI.Parent then
+		return
+	end
+
+	Notice.Visible=true
+
+	if Animations then
+		tw(Notice,.35,{
+			Position=UDim2.new(.5,-140,0,15)
+		}):Play()
+	else
+		Notice.Position=UDim2.new(.5,-140,0,15)
+	end
+
+	pcall(function()
+		NoticeSound:Play()
+	end)
+
+	task.wait(7)
+
+	if Notice.Parent then
+		if Animations then
+			local t=tw(Notice,.35,{
+				Position=UDim2.new(.5,-140,0,-90)
+			})
+
+			t:Play()
+			t.Completed:Wait()
+		else
+			Notice.Position=UDim2.new(.5,-140,0,-90)
+		end
+
+		Notice.Visible=false
+	end
+end
+
+task.spawn(function()
+	while GUI.Parent do
+		task.wait(900)
+
+		if GUI.Parent then
+			task.spawn(showNotice)
+		end
+	end
+end)
+
+--------------------------------------------------
+-- REINICIO POR SEMILLA (3 SEGUNDOS)
+--------------------------------------------------
+
+local ScriptSource = [=[
+	-- Semilla de reinicio de OP ADIVINE HUB
+]=]
+
+Reset.MouseButton1Click:Connect(function()
+	vibrate()
+
+	AutoSlap=false
+	DodgeMode=0
+	AutoDodge=false
+	QueueWaiting=false
+	LastAttacker=nil
+	AutoJoinActive=false
+	removeFakeCharacter()
+
+	Reset.Text="REINICIANDO (3s)..."
+
+	task.spawn(function()
+		task.wait(3)
+		pcall(function()
+			if loadstring then
+				loadstring(ScriptSource)()
+			end
+		end)
+	end)
+
+	if GUI then
+		GUI:Destroy()
+	end
+end)
+
+Yes.MouseButton1Click:Connect(function()
+	vibrate()
+
+	AutoSlap=false
+	DodgeMode=0
+	AutoDodge=false
+	QueueWaiting=false
+	AutoJoinActive=false
+	removeFakeCharacter()
+
+	pcall(function()
+		DodgeEvent:FireServer(false)
+	end)
+
+	GUI:Destroy()
+end)
+
+--------------------------------------------------
+-- FADE IN
+--------------------------------------------------
+
+Main.BackgroundTransparency=1
+MainStroke.Transparency=1
+
+for _,o in ipairs(Main:GetDescendants()) do
+	if o:IsA("TextLabel") or o:IsA("TextButton") then
+		o.TextTransparency=1
+
+	elseif o:IsA("ImageLabel") then
+		o.ImageTransparency=1
+	end
+end
+
+if Animations then
+	tw(Main,1,{
+		BackgroundTransparency=.12
+	}):Play()
+
+	tw(MainStroke,1,{
+		Transparency=0
+	}):Play()
+
+	for _,o in ipairs(Main:GetDescendants()) do
+		if o:IsA("TextLabel") or o:IsA("TextButton") then
+			tw(o,1,{
+				TextTransparency=0
+			}):Play()
+
+		elseif o:IsA("ImageLabel") then
+			tw(o,1,{
+				ImageTransparency=0
+			}):Play()
+		end
+	end
+else
+	Main.BackgroundTransparency=.12
+	MainStroke.Transparency=0
+
+	for _,o in ipairs(Main:GetDescendants()) do
+		if o:IsA("TextLabel") or o:IsA("TextButton") then
+			o.TextTransparency=0
+
+		elseif o:IsA("ImageLabel") then
+			o.ImageTransparency=0
+		end
+	end
+end
+
+ApplyTheme()
